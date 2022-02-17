@@ -40,27 +40,42 @@ if (FFTW_DEBUG)
   message(STATUS "FFTW include hint dir: ${_fftw_include_hint_dir}")
 endif()
 
-set(_fftw_library_names "")
-foreach(_fftw_type IN ITEMS "" "f" "l")
-  list(APPEND _fftw_library_names "fftw3${_fftw_type}")
-  foreach(_fftw_parallel IN ITEMS "threads" "omp" "mpi")
-    list(APPEND _fftw_library_names "fftw3${_fftw_type}_${_fftw_parallel}")
-  endforeach()
-endforeach()
+# TODO: go back to loop and name targets same as official targets
+set(Double fftw3)
+set(DoubleThreads fftw3_threads)
+set(DoubleOpenMP fftw3_omp)
+set(DoubleMPI fftw3_mpi)
+set(Float fftw3f)
+set(FloatThreads fftw3f_threads)
+set(FloatOpenMP fftw3f_omp)
+set(FloatMPI fftw3f_mpi)
+set(Long fftw3l)
+set(LongThreads fftw3l_threads)
+set(LongOpenMP fftw3l_omp)
+set(LongMPI fftw3l_mpi)
 
-if (FFTW_DEBUG)
-  message(STATUS "FFTW libraries: ${_fftw_library_names}")
-endif()
+set(_fftw_components
+  Double
+  DoubleThreads
+  DoubleOpenMP
+  DoubleMPI
+  Float
+  FloatThreads
+  FloatOpenMP
+  FloatMPI
+  Long
+  LongThreads
+  LongOpenMP
+  LongMPI
+  )
 
-foreach(_fftw_library_name IN LISTS _fftw_library_names)
+foreach(_fftw_library_name IN LISTS _fftw_components)
+  # TODO: if FFTW_ROOT set we should _insist_ on using it
   find_library(_fftw_${_fftw_library_name}_lib
-      NAMES "${_fftw_library_name}"
+      NAMES "${${_fftw_library_name}}"
       PATH_SUFFIXES "lib" "lib64"
       HINTS "${_fftw_library_hint_dir}"
       )
-  if (FFTW_DEBUG)
-    message(STATUS "Looking for ${_fftw_library_name}: _fftw_${_fftw_library_name}_lib = ${_fftw_${_fftw_library_name}_lib}")
-  endif()
 endforeach()
 
 find_path(FFTW_INCLUDE_DIRS
@@ -85,26 +100,12 @@ if (NOT FFTW_FOUND)
   return()
 endif()
 
-function(_fftw_add_target TARGET_NAME LIB_NAME)
-  if (LIB_NAME AND NOT TARGET FFTW::${TARGET_NAME})
-    message(STATUS "Making FFTW target ${TARGET_NAME}")
-    add_library(FFTW::${TARGET_NAME} INTERFACE IMPORTED)
-    set_target_properties(FFTW::${TARGET_NAME} PROPERTIES
+foreach(_fftw_component IN LISTS _fftw_components)
+  if (_fftw_${_fftw_component}_lib AND NOT TARGET FFTW::${_fftw_component})
+    add_library(FFTW::${_fftw_component} INTERFACE IMPORTED)
+    set_target_properties(FFTW::${_fftw_component} PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${FFTW_INCLUDE_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${LIB_NAME}"
+      INTERFACE_LINK_LIBRARIES "${_fftw_${_fftw_component}_lib}"
       )
   endif()
-endfunction()
-
-_fftw_add_target(Double "${_fftw_fftw3_lib}")
-_fftw_add_target(DoubleThreads "${_fftw_fftw3_threads_lib}")
-_fftw_add_target(DoubleOpenMP "${_fftw_fftw3_omp_lib}")
-_fftw_add_target(DoubleMPI "${_fftw_fftw3_mpi_lib}")
-_fftw_add_target(Float "${_fftw_fftw3f_lib}")
-_fftw_add_target(FloatThreads "${_fftw_fftw3f_threads_lib}")
-_fftw_add_target(FloatOpenMP "${_fftw_fftw3f_omp_lib}")
-_fftw_add_target(FloatMPI "${_fftw_fftw3f_mpi_lib}")
-_fftw_add_target(Long "${_fftw_fftw3l_lib}")
-_fftw_add_target(LongThreads "${_fftw_fftw3l_threads_lib}")
-_fftw_add_target(LongOpenMP "${_fftw_fftw3l_omp_lib}")
-_fftw_add_target(LongMPI "${_fftw_fftw3l_mpi_lib}")
+endforeach()
