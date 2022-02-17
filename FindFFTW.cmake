@@ -69,7 +69,9 @@ find_path(FFTW_INCLUDE_DIRS
   HINTS "${_fftw_include_hint_dir}"
   )
 
-set(FFTW_DOUBLE_LIB_FOUND ${_fftw_fftw_lib})
+foreach(_fftw_component IN LISTS _fftw_components)
+  set(FFTW_${_fftw_component}_FOUND ${_fftw_${_fftw_component}_lib})
+endforeach()
 
 include(FindPackageHandleStandardArgs)
 
