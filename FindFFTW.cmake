@@ -1,4 +1,40 @@
+# SPDX-License-Identifier: BSD-3
+# Copyright (c) 2022, Peter Hill
+#
+# FindFFTW
+# --------
+#
+# Finds the FFTW3 library for Fourier transforms.
+# http://fftw.org
+#
+# Components
+# ^^^^^^^^^^
+#
+# The following components can be specified:
+#
+# - ``fftw3``: ``double`` version
+# - ``fftw3f``: ``float`` version
+# - ``fftw3l``: ``long double`` version
+#
+# along with the following suffixes:
+#
+# - ``_threads``: pthreads version
+# - ``_omp``: OpenMP version
+# - ``_mpi``: MPI version
+#
+# So, for example to get the OpenMP ``float`` version, would be ``fftw3f_omp``.
 
+# Variables
+# ^^^^^^^^^
+#
+# ``FFTW_FOUND``
+# ``FFTW_INCLUDE_DIRS``
+# ``FFTW_<component>_LIBRARY``
+# ``FFTW_VERSION``
+# ``FFTW_DEBUG``: output some debug information
+#
+# Plus a target for each found component, in the ``FFTW3::`` namespace, for
+# example ``FFTW3::fftw3_omp``
 
 find_package(PkgConfig)
 
