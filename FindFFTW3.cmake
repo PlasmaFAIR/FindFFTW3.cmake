@@ -122,7 +122,7 @@ if (NOT FFTW3_FOUND)
 endif()
 
 foreach(_fftw_component IN LISTS _fftw_components)
-  if (FFTW3_${_fftw_component}_LIBRARY AND NOT TARGET FFTW::${_fftw_component})
+  if (FFTW3_${_fftw_component}_LIBRARY AND NOT TARGET FFTW3::${_fftw_component})
     add_library(FFTW3::${_fftw_component} INTERFACE IMPORTED)
     set_target_properties(FFTW3::${_fftw_component} PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${FFTW3_INCLUDE_DIRS}"
