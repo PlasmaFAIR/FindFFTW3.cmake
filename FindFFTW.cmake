@@ -40,42 +40,24 @@ if (FFTW_DEBUG)
   message(STATUS "FFTW include hint dir: ${_fftw_include_hint_dir}")
 endif()
 
-# TODO: go back to loop and name targets same as official targets
-set(Double fftw3)
-set(DoubleThreads fftw3_threads)
-set(DoubleOpenMP fftw3_omp)
-set(DoubleMPI fftw3_mpi)
-set(Float fftw3f)
-set(FloatThreads fftw3f_threads)
-set(FloatOpenMP fftw3f_omp)
-set(FloatMPI fftw3f_mpi)
-set(Long fftw3l)
-set(LongThreads fftw3l_threads)
-set(LongOpenMP fftw3l_omp)
-set(LongMPI fftw3l_mpi)
+set(_fftw_components "")
+set(_fftw_parallel_types "")
+foreach(_fftw_type IN ITEMS "" "f" "l")
+  list(APPEND _fftw_components "fftw3${_fftw_type}")
+  foreach(_fftw_parallel IN ITEMS "threads" "omp" "mpi")
+    set(_fftw_lib_name "fftw3${_fftw_type}_${_fftw_parallel}")
+    list(APPEND _fftw_components "${_fftw_lib_name}")
+    list(APPEND _fftw_parallel_types "${_fftw_lib_name}")
+    set(${_fftw_lib_name}_base_lib "FFTW3::fftw3${_fftw_type}")
+  endforeach()
+endforeach()
 
-set(_fftw_components
-  Double
-  DoubleThreads
-  DoubleOpenMP
-  DoubleMPI
-  Float
-  FloatThreads
-  FloatOpenMP
-  FloatMPI
-  Long
-  LongThreads
-  LongOpenMP
-  LongMPI
-  )
-
-foreach(_fftw_library_name IN LISTS _fftw_components)
-  # TODO: if FFTW_ROOT set we should _insist_ on using it
-  find_library(_fftw_${_fftw_library_name}_lib
-      NAMES "${${_fftw_library_name}}"
-      PATH_SUFFIXES "lib" "lib64"
-      HINTS "${_fftw_library_hint_dir}"
-      )
+foreach(_fftw_component IN LISTS _fftw_components)
+  find_library(FFTW_${_fftw_component}_LIBRARY
+    NAMES "${_fftw_component}"
+    PATH_SUFFIXES "lib" "lib64"
+    HINTS "${_fftw_library_hint_dir}"
+    )
 endforeach()
 
 find_path(FFTW_INCLUDE_DIRS
@@ -85,7 +67,10 @@ find_path(FFTW_INCLUDE_DIRS
   )
 
 foreach(_fftw_component IN LISTS _fftw_components)
-  set(FFTW_${_fftw_component}_FOUND ${_fftw_${_fftw_component}_lib})
+  if (FFTW_DEBUG)
+    message(STATUS "FFTW_${_fftw_component}_LIBRARY: ${FFTW_${_fftw_component}_LIBRARY}")
+  endif()
+  set(FFTW_${_fftw_component}_FOUND ${FFTW_${_fftw_component}_LIBRARY})
 endforeach()
 
 include(FindPackageHandleStandardArgs)
@@ -101,11 +86,11 @@ if (NOT FFTW_FOUND)
 endif()
 
 foreach(_fftw_component IN LISTS _fftw_components)
-  if (_fftw_${_fftw_component}_lib AND NOT TARGET FFTW::${_fftw_component})
-    add_library(FFTW::${_fftw_component} INTERFACE IMPORTED)
-    set_target_properties(FFTW::${_fftw_component} PROPERTIES
+  if (FFTW_${_fftw_component}_LIBRARY AND NOT TARGET FFTW::${_fftw_component})
+    add_library(FFTW3::${_fftw_component} INTERFACE IMPORTED)
+    set_target_properties(FFTW3::${_fftw_component} PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${FFTW_INCLUDE_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_fftw_${_fftw_component}_lib}"
+      INTERFACE_LINK_LIBRARIES "${FFTW_${_fftw_component}_LIBRARY};${${_fftw_component}_base_lib}"
       )
   endif()
 endforeach()
