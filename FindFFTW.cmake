@@ -9,6 +9,7 @@ endif()
 if (PKG_FFTW_LIBRARY_DIRS)
   set(_fftw_library_hint_dir "${PKG_FFTW_LIBRARY_DIRS}")
   set(_fftw_include_hint_dir "${PKG_FFTW_INCLUDE_DIRS}")
+  set(FFTW_VERSION ${PKG_FFTW_VERSION})
 else()
   find_program(FFTW_WISDOM "fftw-wisdom"
     PATH_SUFFIXES bin
@@ -19,6 +20,13 @@ else()
       " FFTW_WISDOM = ${FFTW_WISDOM}"
       )
   endif()
+
+  execute_process(
+    COMMAND "${FFTW_WISDOM} --version"
+    OUTPUT_VARIABLE _fftw_wisdom_version
+    )
+
+  string(REGEX REPLACE ".*FFTW version \([0-9]+\.[0-9]+\.[0-9]+\).*" "\\1" FFTW_VERSION "${_fftw_wisdom_version}")
 
   get_filename_component(_fftw_wisdom_tmp "${FFTW_WISDOM}" DIRECTORY)
   get_filename_component(_fftw_hint_dir "${_fftw_wisdom_tmp}" DIRECTORY)
@@ -67,6 +75,7 @@ include(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(FFTW
   REQUIRED_VARS FFTW_INCLUDE_DIRS
+  VERSION_VAR FFTW_VERSION
   HANDLE_COMPONENTS
   )
 
