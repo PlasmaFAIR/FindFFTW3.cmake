@@ -27,53 +27,53 @@
 # Variables
 # ^^^^^^^^^
 #
-# ``FFTW_FOUND``
-# ``FFTW_INCLUDE_DIRS``
-# ``FFTW_<component>_LIBRARY``
-# ``FFTW_VERSION``
-# ``FFTW_DEBUG``: output some debug information
+# ``FFTW3_FOUND``
+# ``FFTW3_INCLUDE_DIRS``
+# ``FFTW3_<component>_LIBRARY``
+# ``FFTW3_VERSION``
+# ``FFTW3_DEBUG``: output some debug information
 #
 # Plus a target for each found component, in the ``FFTW3::`` namespace, for
 # example ``FFTW3::fftw3_omp``
 
 find_package(PkgConfig)
 
-if (PKG_CONFIG_FOUND AND NOT FFTW_ROOT)
-  pkg_check_modules(PKG_FFTW QUIET "fftw3")
+if (PKG_CONFIG_FOUND AND NOT FFTW3_ROOT)
+  pkg_check_modules(PKG_FFTW3 QUIET "fftw3")
 endif()
 
-if (PKG_FFTW_LIBRARY_DIRS)
-  set(_fftw_library_hint_dir "${PKG_FFTW_LIBRARY_DIRS}")
-  set(_fftw_include_hint_dir "${PKG_FFTW_INCLUDE_DIRS}")
-  set(FFTW_VERSION ${PKG_FFTW_VERSION})
+if (PKG_FFTW3_LIBRARY_DIRS)
+  set(_fftw_library_hint_dir "${PKG_FFTW3_LIBRARY_DIRS}")
+  set(_fftw_include_hint_dir "${PKG_FFTW3_INCLUDE_DIRS}")
+  set(FFTW3_VERSION ${PKG_FFTW3_VERSION})
 else()
-  find_program(FFTW_WISDOM "fftw-wisdom"
+  find_program(FFTW3_WISDOM "fftw-wisdom"
     PATH_SUFFIXES bin
     DOC "Path to fftw-wisdom executable"
     )
-  if (FFTW_DEBUG)
+  if (FFTW3_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-      " FFTW_WISDOM = ${FFTW_WISDOM}"
+      " FFTW3_WISDOM = ${FFTW3_WISDOM}"
       )
   endif()
 
   execute_process(
-    COMMAND "${FFTW_WISDOM} --version"
+    COMMAND "${FFTW3_WISDOM} --version"
     OUTPUT_VARIABLE _fftw_wisdom_version
     )
 
-  string(REGEX REPLACE ".*FFTW version \([0-9]+\.[0-9]+\.[0-9]+\).*" "\\1" FFTW_VERSION "${_fftw_wisdom_version}")
+  string(REGEX REPLACE ".*FFTW version \([0-9]+\.[0-9]+\.[0-9]+\).*" "\\1" FFTW3_VERSION "${_fftw_wisdom_version}")
 
-  get_filename_component(_fftw_wisdom_tmp "${FFTW_WISDOM}" DIRECTORY)
+  get_filename_component(_fftw_wisdom_tmp "${FFTW3_WISDOM}" DIRECTORY)
   get_filename_component(_fftw_hint_dir "${_fftw_wisdom_tmp}" DIRECTORY)
 
   set(_fftw_library_hint_dir "${_fftw_hint_dir}")
   set(_fftw_include_hint_dir "${_fftw_hint_dir}")
 endif()
 
-if (FFTW_DEBUG)
-  message(STATUS "FFTW library hint dir: ${_fftw_library_hint_dir}")
-  message(STATUS "FFTW include hint dir: ${_fftw_include_hint_dir}")
+if (FFTW3_DEBUG)
+  message(STATUS "FFTW3 library hint dir: ${_fftw_library_hint_dir}")
+  message(STATUS "FFTW3 include hint dir: ${_fftw_include_hint_dir}")
 endif()
 
 set(_fftw_components "")
@@ -89,44 +89,44 @@ foreach(_fftw_type IN ITEMS "" "f" "l")
 endforeach()
 
 foreach(_fftw_component IN LISTS _fftw_components)
-  find_library(FFTW_${_fftw_component}_LIBRARY
+  find_library(FFTW3_${_fftw_component}_LIBRARY
     NAMES "${_fftw_component}"
     PATH_SUFFIXES "lib" "lib64"
     HINTS "${_fftw_library_hint_dir}"
     )
 endforeach()
 
-find_path(FFTW_INCLUDE_DIRS
+find_path(FFTW3_INCLUDE_DIRS
   NAMES "fftw3.h"
   PATH_SUFFIXES "include"
   HINTS "${_fftw_include_hint_dir}"
   )
 
 foreach(_fftw_component IN LISTS _fftw_components)
-  if (FFTW_DEBUG)
-    message(STATUS "FFTW_${_fftw_component}_LIBRARY: ${FFTW_${_fftw_component}_LIBRARY}")
+  if (FFTW3_DEBUG)
+    message(STATUS "FFTW3_${_fftw_component}_LIBRARY: ${FFTW3_${_fftw_component}_LIBRARY}")
   endif()
-  set(FFTW_${_fftw_component}_FOUND ${FFTW_${_fftw_component}_LIBRARY})
+  set(FFTW3_${_fftw_component}_FOUND ${FFTW3_${_fftw_component}_LIBRARY})
 endforeach()
 
 include(FindPackageHandleStandardArgs)
 
-find_package_handle_standard_args(FFTW
-  REQUIRED_VARS FFTW_INCLUDE_DIRS
-  VERSION_VAR FFTW_VERSION
+find_package_handle_standard_args(FFTW3
+  REQUIRED_VARS FFTW3_INCLUDE_DIRS
+  VERSION_VAR FFTW3_VERSION
   HANDLE_COMPONENTS
   )
 
-if (NOT FFTW_FOUND)
+if (NOT FFTW3_FOUND)
   return()
 endif()
 
 foreach(_fftw_component IN LISTS _fftw_components)
-  if (FFTW_${_fftw_component}_LIBRARY AND NOT TARGET FFTW::${_fftw_component})
+  if (FFTW3_${_fftw_component}_LIBRARY AND NOT TARGET FFTW::${_fftw_component})
     add_library(FFTW3::${_fftw_component} INTERFACE IMPORTED)
     set_target_properties(FFTW3::${_fftw_component} PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${FFTW_INCLUDE_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${FFTW_${_fftw_component}_LIBRARY};${${_fftw_component}_base_lib}"
+      INTERFACE_INCLUDE_DIRECTORIES "${FFTW3_INCLUDE_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${FFTW3_${_fftw_component}_LIBRARY};${${_fftw_component}_base_lib}"
       )
   endif()
 endforeach()

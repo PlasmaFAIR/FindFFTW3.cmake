@@ -3,7 +3,7 @@ project(test_find_fftw LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/.." ${CMAKE_MODULE_PATH})
 
-find_package(FFTW COMPONENTS fftw3 fftw3_omp)
+find_package(FFTW3 COMPONENTS fftw3 fftw3_omp)
 
 add_executable(test_find_fftw test_find_fftw.cxx)
 target_link_libraries(test_find_fftw FFTW3::fftw3)
