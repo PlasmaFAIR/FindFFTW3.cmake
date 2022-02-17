@@ -1,0 +1,23 @@
+name: Test
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install dependencies
+        run: sudo apt update &&
+             sudo apt install -y libfftw3-dev
+
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Configure tests
+        run: cmake -S test -B test/build
+
+      - name: Build tests
+        run: cmake --build test/build
+
+      - name: Run tests
+        run: test/build/test_find_fftw && test/build/test_find_fftw_openmp
